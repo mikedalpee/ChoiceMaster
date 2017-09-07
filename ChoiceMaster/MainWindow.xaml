@@ -1,12 +1,199 @@
 ﻿<Window x:Class="ChoiceMaster.MainWindow"
+        x:Name="ChoiceMasterWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ChoiceMaster"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        SizeToContent="WidthAndHeight"
+        Title="Choice Master">
+    <Window.Resources>
+        <local:OrderingRelationStrings x:Key="OrderingRelationStrings"/>
+        <local:ScorerTypeStrings x:Key="ScorerTypeStrings"/>
+    </Window.Resources>
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Menu 
+            x:Name="MenuBar" 
+            Grid.Row="0" Grid.Column="0" >
+            <MenuItem x:Name="Model" Header="Model">
+                <MenuItem x:Name="Model_New"  Header="New..." Click="New_Click"/>
+                <MenuItem x:Name="Model_Open" Header="Open..."/>
+                <MenuItem x:Name="Model_Close" Header="Close"/>
+                <MenuItem x:Name="Model_Save" Header="Save..."/>
+                <MenuItem x:Name="Model_SaveAs" Header="Save As..."/>
+            </MenuItem>
+        </Menu>
+        <GroupBox 
+            x:Name="ModelName" 
+            Grid.Row="1" Grid.Column="0">
+            <GroupBox.HeaderTemplate>
+                <DataTemplate>
+                    <TextBox Text="{Binding Name, Mode=OneWay}" IsReadOnly="True" BorderThickness="0"
+                      DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type GroupBox}}}" />
+                </DataTemplate>
+            </GroupBox.HeaderTemplate>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <GroupBox Header="Score" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+                    <TextBox
+                        x:Name="Score"                        
+                        Text="{Binding Score, Mode=OneWay,StringFormat={}{0:0.000}}" 
+                        IsReadOnly="True"
+                        DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type GroupBox}}}" />
+                </GroupBox>
+                <GroupBox Header="Criteria" Grid.Row="1" Grid.Column="0">
+                    <DataGrid 
+                        x:Name="Criteria" 
+                    
+                        AutoGenerateColumns="False"
+                        ItemsSource="{Binding OrderedCriteria}" 
+                        DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type GroupBox}}}"
+                        ColumnWidth="*"
+                        CanUserAddRows="True"
+                        CanUserDeleteRows="True"
+                        CanUserSortColumns="False"
+                        CanUserReorderColumns="False"
+                        ScrollViewer.CanContentScroll="True" 
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                        SelectionMode="Extended" 
+                        AllowDrop="True"
+                        BeginningEdit="Criteria_BeginningEdit" SelectionChanged="Criteria_SelectionChanged">
+                        <DataGrid.RowValidationRules>
+                            <local:CriterionValidationRule ValidationStep="UpdatedValue" />
+                        </DataGrid.RowValidationRules>
+                        <DataGrid.Resources>
+                            <Style x:Key="textBoxErrorStyle" TargetType="{x:Type TextBox}">
+                                <Setter Property="Padding" Value="-2"/>
+                                <Style.Triggers>
+                                    <Trigger Property="Validation.HasError" Value="True">
+                                        <Setter Property="Background" Value="Red"/>
+                                        <Setter Property="ToolTip" 
+                                                Value="{Binding RelativeSource={RelativeSource Self},
+                                                Path=(Validation.Errors)[0].ErrorContent}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.RowValidationErrorTemplate>
+                            <ControlTemplate>
+                                <Grid 
+                                    Margin="0,-2,0,-2"
+                                    ToolTip="{Binding RelativeSource={RelativeSource
+                                    FindAncestor, AncestorType={x:Type DataGridRow}},
+                                    Path=(Validation.Errors)[0].ErrorContent}">
+                                        <Ellipse 
+                                            StrokeThickness="0" 
+                                            Fill="Red" 
+                                            Width="{TemplateBinding FontSize}" 
+                                            Height="{TemplateBinding FontSize}" />
+                                        <TextBlock 
+                                            Text="!" 
+                                            FontSize="{TemplateBinding FontSize}" 
+                                            FontWeight="Bold" Foreground="White" 
+                                            HorizontalAlignment="Center"  />
+                                </Grid>
+                            </ControlTemplate>
+                        </DataGrid.RowValidationErrorTemplate>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn 
+                                Header="Name"
+                                Width="Auto"
+                                EditingElementStyle="{StaticResource textBoxErrorStyle}">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="Name" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
+                                        <Binding.ValidationRules>
+                                            <local:CellValidationRule ValidationStep="UpdatedValue"/>
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn 
+                                Header="Description" 
+                                Width="Auto"
+                                EditingElementStyle="{StaticResource textBoxErrorStyle}">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="Description" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
+                                        <Binding.ValidationRules>
+                                            <local:CellValidationRule ValidationStep="UpdatedValue"/>
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn 
+                                Header="Weight"
+                                Width="Auto"
+                                Binding="{Binding Weight,Mode=OneWay,Converter={local:WeightStringConverter}}" />
+                            <DataGridComboBoxColumn 
+                                x:Name="RelationToNextComboBox" 
+                                Header="Relation To Next"
+                                Width="Auto"
+                                ItemsSource="{StaticResource OrderingRelationStrings}"
+                                DisplayMemberPath="{Binding Path=RelationTo,Converter={local:OrderingRelationStringCoverter},UpdateSourceTrigger=PropertyChanged}"
+                                SelectedValueBinding="{Binding Path=RelationTo,Mode=TwoWay,Converter={local:OrderingRelationStringCoverter},UpdateSourceTrigger=PropertyChanged}">
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                        <EventSetter Event="SelectionChanged" Handler="RelationToNextComboBox_SelectionChanged" />
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                            </DataGridComboBoxColumn>
+                            <DataGridComboBoxColumn 
+                                x:Name="ScorerTypeComboBox" 
+                                Header="Scorer Type"
+                                Width="Auto"
+                                ItemsSource="{StaticResource ScorerTypeStrings}"
+                                DisplayMemberPath="{Binding Path=ScorerType,Converter={local:ScorerTypeStringConverter},UpdateSourceTrigger=PropertyChanged}"
+                                SelectedValueBinding="{Binding Path=ScorerType,Mode=TwoWay,Converter={local:ScorerTypeStringConverter},UpdateSourceTrigger=PropertyChanged}">
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                        <EventSetter Event="SelectionChanged" Handler="ScorerTypeComboBox_SelectionChanged" />
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                            </DataGridComboBoxColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </GroupBox>
+                <GroupBox 
+                    x:Name="Scorer" 
+                    Grid.Row="1" Grid.Column="1" GotFocus="Scorer_GotFocus" LostFocus="Scorer_LostFocus">
+                    <GroupBox.HeaderTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding ScorerType, Mode=OneWay,Converter={local:ScorerEditorStringConverter}}" IsReadOnly="True" BorderThickness="0"
+                                     DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type GroupBox}}}" />
+                        </DataTemplate>
+                    </GroupBox.HeaderTemplate>
+                    <GroupBox.Style>
+                        <Style TargetType="GroupBox">
+                            <Setter Property="Content" Value="{Binding ScorerEditor}"/>
+                        </Style>
+                    </GroupBox.Style>
+                </GroupBox>
+            </Grid>
+        </GroupBox>
+        <Popup x:Name="Model_New_Popup" PlacementTarget="{Binding ElementName=Model}" Placement="Right">
+            <Border BorderThickness="1,1,1,1">
+                <StackPanel Background="White" Focusable="True" FocusManager.FocusedElement="{Binding ElementName=Model_New_Name}">
+                    <GroupBox x:Name="DataTypeGroup" Grid.Row="0" Grid.Column="1">
+                        <GroupBox.Header>Model Name</GroupBox.Header>
+                        <TextBox x:Name="Model_New_Name" KeyUp="Model_New_Name_KeyUp" IsVisibleChanged="Model_New_Name_IsVisibleChanged"/>
+                    </GroupBox>
+                </StackPanel>
+            </Border>
+        </Popup>
     </Grid>
 </Window>
