@@ -12,9 +12,9 @@ namespace ChoiceMaster
         public class RelationshipError : Exception
         {
         }
-        public class WeightChange : Subject<string>
+        public class WeightChange : Topic<string>
         {
-            public const string SubjectIdentifier = nameof(Criterion) + "." + nameof(WeightChange);
+            public const string TopicIdentifier = nameof(Criterion) + "." + nameof(WeightChange);
 
             public double NewWeight
             {
@@ -23,7 +23,7 @@ namespace ChoiceMaster
             }
             public WeightChange(double newWeight)
             :
-                base(SubjectIdentifier)
+                base(TopicIdentifier)
             {
                 NewWeight = newWeight;
             }
@@ -46,9 +46,9 @@ namespace ChoiceMaster
                 }
             }
         }
-        public class NameChange : Subject<string>
+        public class NameChange : Topic<string>
         {
-            public const string SubjectIdentifier = nameof(Criterion) + "." + nameof(NameChange);
+            public const string TopicIdentifier = nameof(Criterion) + "." + nameof(NameChange);
 
             public string NewName
             {
@@ -57,7 +57,7 @@ namespace ChoiceMaster
             }
             public NameChange(string newName)
             :
-                base(SubjectIdentifier)
+                base(TopicIdentifier)
             {
                 NewName = newName;
             }
@@ -94,9 +94,9 @@ namespace ChoiceMaster
                 }
             }
         }
-        public class DescriptionChange : Subject<string>
+        public class DescriptionChange : Topic<string>
         {
-            public const string SubjectIdentifier = nameof(Criterion) + "." + nameof(DescriptionChange);
+            public const string TopicIdentifier = nameof(Criterion) + "." + nameof(DescriptionChange);
 
             public string NewDescription
             {
@@ -105,7 +105,7 @@ namespace ChoiceMaster
             }
             public DescriptionChange(string newDescription)
             :
-                base(SubjectIdentifier)
+                base(TopicIdentifier)
             {
                 NewDescription = newDescription;
             }
@@ -128,9 +128,9 @@ namespace ChoiceMaster
                 }
             }
         }
-        public class ScorerChange : Subject<string>
+        public class ScorerChange : Topic<string>
         {
-            public const string SubjectIdentifier = nameof(Criterion) + "." + nameof(ScorerChange);
+            public const string TopicIdentifier = nameof(Criterion) + "." + nameof(ScorerChange);
 
             public Scorer NewScorer
             {
@@ -139,7 +139,7 @@ namespace ChoiceMaster
             }
             public ScorerChange(Scorer newScorer)
             :
-                base(SubjectIdentifier)
+                base(TopicIdentifier)
             {
                 NewScorer = newScorer;
             }
@@ -174,9 +174,9 @@ namespace ChoiceMaster
                 return CriterionOrderings[Name];
             }
         }
-        public class RelationToChange : Subject<string>
+        public class RelationToChange : Topic<string>
         {
-            public const string SubjectIdentifier = nameof(Criterion) + "." + nameof(RelationToChange);
+            public const string TopicIdentifier = nameof(Criterion) + "." + nameof(RelationToChange);
 
             public Criterion NewRelationTo
             {
@@ -185,7 +185,7 @@ namespace ChoiceMaster
             }
             public RelationToChange(Criterion newRelationTo)
             :
-                base(SubjectIdentifier)
+                base(TopicIdentifier)
             {
                 NewRelationTo = newRelationTo;
             }
@@ -216,9 +216,9 @@ namespace ChoiceMaster
                 }
             }
         }
-        public class RelatedCriterionChange : Subject<string>
+        public class RelatedCriterionChange : Topic<string>
         {
-            public const string SubjectIdentifier = nameof(Criterion) + "." + nameof(RelatedCriterionChange);
+            public const string TopicIdentifier = nameof(Criterion) + "." + nameof(RelatedCriterionChange);
 
             public Criterion NewRelatedCriterion
             {
@@ -227,7 +227,7 @@ namespace ChoiceMaster
             }
             public RelatedCriterionChange(Criterion newRelatedCriterion)
             :
-                base(SubjectIdentifier)
+                base(TopicIdentifier)
             {
                 NewRelatedCriterion = newRelatedCriterion;
             }
@@ -266,18 +266,18 @@ namespace ChoiceMaster
                 string description,
                 Scorer scorer)
         {
-            MyBroker.Instance.Register(this, Criterion.DescriptionChange.SubjectIdentifier);
-            MyBroker.Instance.Register(this, Criterion.NameChange.SubjectIdentifier);
-            MyBroker.Instance.Register(this, Criterion.RelatedCriterionChange.SubjectIdentifier);
-            MyBroker.Instance.Register(this, Criterion.RelationToChange.SubjectIdentifier);
-            MyBroker.Instance.Register(this, Criterion.ScorerChange.SubjectIdentifier);
-            MyBroker.Instance.Register(this, Criterion.WeightChange.SubjectIdentifier);
-            MyBroker.Instance.Register(this, Scorer.RatingChange.SubjectIdentifier);
+            MyBroker.Instance.Register(this, Criterion.DescriptionChange.TopicIdentifier);
+            MyBroker.Instance.Register(this, Criterion.NameChange.TopicIdentifier);
+            MyBroker.Instance.Register(this, Criterion.RelatedCriterionChange.TopicIdentifier);
+            MyBroker.Instance.Register(this, Criterion.RelationToChange.TopicIdentifier);
+            MyBroker.Instance.Register(this, Criterion.ScorerChange.TopicIdentifier);
+            MyBroker.Instance.Register(this, Criterion.WeightChange.TopicIdentifier);
+            MyBroker.Instance.Register(this, Scorer.RatingChange.TopicIdentifier);
             Name = name;
             Description = description;
             CriterionOrderings = criterionOrderings;
             Scorer = scorer;
-            MyBroker.Instance.Subscribe(this, Scorer.RatingChange.SubjectIdentifier, Scorer);
+            MyBroker.Instance.Subscribe(this, Scorer.RatingChange.TopicIdentifier, Scorer);
         }
         public void AddCriterionOrdering(
             CriterionOrdering.OrderingRelation relation,
@@ -475,7 +475,7 @@ namespace ChoiceMaster
 
             return 0;
         }
-        public void Notify(ISubject<string> subject, IPublisher<string> publisher)
+        public void Notify(ITopic<string> subject, IPublisher<string> publisher)
         {
             MyBroker.Instance.Publish(this,subject);
         }
@@ -490,14 +490,14 @@ namespace ChoiceMaster
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    MyBroker.Instance.Unregister(this, Criterion.DescriptionChange.SubjectIdentifier);
-                    MyBroker.Instance.Unregister(this, Criterion.NameChange.SubjectIdentifier);
-                    MyBroker.Instance.Unregister(this, Criterion.RelatedCriterionChange.SubjectIdentifier);
-                    MyBroker.Instance.Unregister(this, Criterion.RelationToChange.SubjectIdentifier);
-                    MyBroker.Instance.Unregister(this, Criterion.ScorerChange.SubjectIdentifier);
-                    MyBroker.Instance.Unregister(this, Scorer.RatingChange.SubjectIdentifier);
-                    MyBroker.Instance.Unregister(this, Criterion.WeightChange.SubjectIdentifier);
-                    MyBroker.Instance.Unsubscribe(this, Scorer.RatingChange.SubjectIdentifier, Scorer);
+                    MyBroker.Instance.Unregister(this, Criterion.DescriptionChange.TopicIdentifier);
+                    MyBroker.Instance.Unregister(this, Criterion.NameChange.TopicIdentifier);
+                    MyBroker.Instance.Unregister(this, Criterion.RelatedCriterionChange.TopicIdentifier);
+                    MyBroker.Instance.Unregister(this, Criterion.RelationToChange.TopicIdentifier);
+                    MyBroker.Instance.Unregister(this, Criterion.ScorerChange.TopicIdentifier);
+                    MyBroker.Instance.Unregister(this, Scorer.RatingChange.TopicIdentifier);
+                    MyBroker.Instance.Unregister(this, Criterion.WeightChange.TopicIdentifier);
+                    MyBroker.Instance.Unsubscribe(this, Scorer.RatingChange.TopicIdentifier, Scorer);
 
                     Scorer.Dispose();
                 }

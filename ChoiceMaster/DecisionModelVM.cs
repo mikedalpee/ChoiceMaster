@@ -42,8 +42,8 @@ namespace ChoiceMaster
                     Score           = decisionModel.Score;
                     OrderedCriteria = CreateEditableCriteria(decisionModel.OrderedCriteria);
 
-                    MyBroker.Instance.Subscribe(this, DecisionModel.OrderedCriteriaChange.SubjectIdentifier, value);
-                    MyBroker.Instance.Subscribe(this, DecisionModel.ScoreChange.SubjectIdentifier, value);
+                    MyBroker.Instance.Subscribe(this, DecisionModel.OrderedCriteriaChange.TopicIdentifier, value);
+                    MyBroker.Instance.Subscribe(this, DecisionModel.ScoreChange.TopicIdentifier, value);
 
                     NotifyPropertyChanged("DecisionModel");
                 }
@@ -181,16 +181,16 @@ namespace ChoiceMaster
                 }
             }
         }
-        public void Notify(ISubject<string> subject,IPublisher<string> publisher)
+        public void Notify(ITopic<string> subject,IPublisher<string> publisher)
         {
             switch (subject.Identifier)
             {
-                case DecisionModel.OrderedCriteriaChange.SubjectIdentifier:
+                case DecisionModel.OrderedCriteriaChange.TopicIdentifier:
                     {
                         OrderedCriteria = CreateEditableCriteria(((DecisionModel.OrderedCriteriaChange)subject).NewOrderedCriteria);
                         break;
                     }
-                case DecisionModel.ScoreChange.SubjectIdentifier:
+                case DecisionModel.ScoreChange.TopicIdentifier:
                     {
                         Score = ((DecisionModel.ScoreChange)subject).NewScore;
                         break;
@@ -256,8 +256,8 @@ namespace ChoiceMaster
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    MyBroker.Instance.Unsubscribe(this, DecisionModel.OrderedCriteriaChange.SubjectIdentifier, DecisionModel);
-                    MyBroker.Instance.Unsubscribe(this, DecisionModel.ScoreChange.SubjectIdentifier, DecisionModel);
+                    MyBroker.Instance.Unsubscribe(this, DecisionModel.OrderedCriteriaChange.TopicIdentifier, DecisionModel);
+                    MyBroker.Instance.Unsubscribe(this, DecisionModel.ScoreChange.TopicIdentifier, DecisionModel);
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

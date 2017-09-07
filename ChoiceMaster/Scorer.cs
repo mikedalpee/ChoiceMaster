@@ -5,15 +5,15 @@ namespace ChoiceMaster
 {
     public abstract class Scorer : Publisher<string>,IDisposable
     {
-        public class RatingChange : Subject<string>
+        public class RatingChange : Topic<string>
         {
-            public const string SubjectIdentifier = nameof(Scorer)+"."+nameof(RatingChange);
+            public const string TopicIdentifier = nameof(Scorer)+"."+nameof(RatingChange);
             public float NewRate
             {
                 get;
                 private set;
             }
-            public RatingChange(double newRate) : base(SubjectIdentifier)
+            public RatingChange(double newRate) : base(TopicIdentifier)
             {
                 NewRate = NewRate;
             }
@@ -53,7 +53,7 @@ namespace ChoiceMaster
         public abstract ScorerType ScorerType { get; protected set; }
         public Scorer() : base("Scorer")
         {
-            MyBroker.Instance.Register(this, Scorer.RatingChange.SubjectIdentifier);
+            MyBroker.Instance.Register(this, Scorer.RatingChange.TopicIdentifier);
         }
 
         #region IDisposable Support
@@ -66,7 +66,7 @@ namespace ChoiceMaster
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    MyBroker.Instance.Unregister(this, Scorer.RatingChange.SubjectIdentifier);
+                    MyBroker.Instance.Unregister(this, Scorer.RatingChange.TopicIdentifier);
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

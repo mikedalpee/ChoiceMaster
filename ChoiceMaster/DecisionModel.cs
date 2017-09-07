@@ -8,9 +8,9 @@ namespace ChoiceMaster
 {
     public class DecisionModel : ISubscriber<string>, IPublisher<string>, IDisposable
     {
-        public class OrderedCriteriaChange : Subject<string>
+        public class OrderedCriteriaChange : Topic<string>
         {
-            public const string SubjectIdentifier = nameof(DecisionModel)+"."+nameof(OrderedCriteriaChange);
+            public const string TopicIdentifier = nameof(DecisionModel)+"."+nameof(OrderedCriteriaChange);
 
             public ICollection<Criterion> NewOrderedCriteria
             {
@@ -19,14 +19,14 @@ namespace ChoiceMaster
             }
             public OrderedCriteriaChange(ICollection<Criterion> newOrderedCriteria)
             :
-                base(SubjectIdentifier)
+                base(TopicIdentifier)
             {
                 NewOrderedCriteria = newOrderedCriteria.ToList();
             }
         }
-        public class ScoreChange : Subject<string>
+        public class ScoreChange : Topic<string>
         {
-            public const string SubjectIdentifier = nameof(DecisionModel)+"."+nameof(ScoreChange);
+            public const string TopicIdentifier = nameof(DecisionModel)+"."+nameof(ScoreChange);
 
             public double NewScore
             {
@@ -35,7 +35,7 @@ namespace ChoiceMaster
             }
             public ScoreChange(double newScore)
             :
-                base(SubjectIdentifier)
+                base(TopicIdentifier)
             {
                 NewScore = newScore;
             }
@@ -109,8 +109,8 @@ namespace ChoiceMaster
                 string name,
                 double scale = DefaultScale)
         {
-            MyBroker.Instance.Register(this, DecisionModel.OrderedCriteriaChange.SubjectIdentifier);
-            MyBroker.Instance.Register(this, DecisionModel.ScoreChange.SubjectIdentifier);
+            MyBroker.Instance.Register(this, DecisionModel.OrderedCriteriaChange.TopicIdentifier);
+            MyBroker.Instance.Register(this, DecisionModel.ScoreChange.TopicIdentifier);
             Name = name;
             Scale = scale <= 0.0 ? DefaultScale : scale;
             CriterionOrderings = new SortedDictionary<string, CriterionOrdering>();
@@ -130,10 +130,10 @@ namespace ChoiceMaster
 
             Criterion c = new Criterion(CriterionOrderings, name, description, scorer);
 
-            MyBroker.Instance.Subscribe(this, Scorer.RatingChange.SubjectIdentifier, c);
-            MyBroker.Instance.Subscribe(this, Criterion.RelatedCriterionChange.SubjectIdentifier, c);
-            MyBroker.Instance.Subscribe(this, Criterion.RelationToChange.SubjectIdentifier, c);
-            MyBroker.Instance.Subscribe(this, Criterion.ScorerChange.SubjectIdentifier, c);
+            MyBroker.Instance.Subscribe(this, Scorer.RatingChange.TopicIdentifier, c);
+            MyBroker.Instance.Subscribe(this, Criterion.RelatedCriterionChange.TopicIdentifier, c);
+            MyBroker.Instance.Subscribe(this, Criterion.RelationToChange.TopicIdentifier, c);
+            MyBroker.Instance.Subscribe(this, Criterion.ScorerChange.TopicIdentifier, c);
 
             Criteria.Add(
                 name,
@@ -286,7 +286,7 @@ namespace ChoiceMaster
 
             return score;
         }
-        public void Notify(ISubject<string> subject, IPublisher<string> publisher)
+        public void Notify(ITopic<string> subject, IPublisher<string> publisher)
         {
             NormalizeCriteria();
         }
@@ -304,16 +304,16 @@ namespace ChoiceMaster
 
                     foreach (var pair in Criteria)
                     {
-                        MyBroker.Instance.Unsubscribe(this, Scorer.RatingChange.SubjectIdentifier, pair.Value);
-                        MyBroker.Instance.Unsubscribe(this, Criterion.RelatedCriterionChange.SubjectIdentifier, pair.Value);
-                        MyBroker.Instance.Unsubscribe(this, Criterion.RelationToChange.SubjectIdentifier, pair.Value);
-                        MyBroker.Instance.Unsubscribe(this, Criterion.ScorerChange.SubjectIdentifier, pair.Value);
+                        MyBroker.Instance.Unsubscribe(this, Scorer.RatingChange.TopicIdentifier, pair.Value);
+                        MyBroker.Instance.Unsubscribe(this, Criterion.RelatedCriterionChange.TopicIdentifier, pair.Value);
+                        MyBroker.Instance.Unsubscribe(this, Criterion.RelationToChange.TopicIdentifier, pair.Value);
+                        MyBroker.Instance.Unsubscribe(this, Criterion.ScorerChange.TopicIdentifier, pair.Value);
 
                         pair.Value.Dispose();
                     }
 
-                    MyBroker.Instance.Unregister(this, DecisionModel.OrderedCriteriaChange.SubjectIdentifier);
-                    MyBroker.Instance.Unregister(this, DecisionModel.ScoreChange.SubjectIdentifier);
+                    MyBroker.Instance.Unregister(this, DecisionModel.OrderedCriteriaChange.TopicIdentifier);
+                    MyBroker.Instance.Unregister(this, DecisionModel.ScoreChange.TopicIdentifier);
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
